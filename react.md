@@ -213,3 +213,21 @@ export default ExpenseItem;
 
 
 
+
+
+
+react는 형제 컴포넌트간 데이터 교류가 불가능
+
+반드시 부모 <-> 자녀 관계로 데이터를 주고 받아야 함.
+
+부모->자녀: props
+
+자녀->부모: 부모 컴포넌트에서 매개변수 받는 함수를 만든 후 자녀에게 props로 함수 전달, 자녀에서 props.전달된함수에 데이터를 넣어서 호출하면 됨.
+
+
+
+
+
+useState를 사용하는 컴포넌트 -> statefull 컴포넌트, controller 컴포넌트
+
+단지 화면을 표시하기 위한 컴포넌트 -> presentation 컴포넌트, dump 컴포넌트
