@@ -26,7 +26,7 @@ cd my-app
 npm start
 ```
 
-
+- 패키지 설치만(ex `node_modules`) 원한다면 `npm install`
 
 
 
@@ -231,3 +231,9 @@ react는 형제 컴포넌트간 데이터 교류가 불가능
 useState를 사용하는 컴포넌트 -> statefull 컴포넌트, controller 컴포넌트
 
 단지 화면을 표시하기 위한 컴포넌트 -> presentation 컴포넌트, dump 컴포넌트
+
+
+
+
+
+npm install --save styled-components
