@@ -236,4 +236,38 @@ useState를 사용하는 컴포넌트 -> statefull 컴포넌트, controller 컴�
 
 
 
-npm install --save styled-components
+
+
+props.children
+
+예를 들어 카드 모양의 ui를 위해서 다음과 같은 코드를 짠다고 해보자
+
+```react
+const AddUser = () => {
+
+  return (
+    <Card>
+      <form>
+        ...
+      </form>
+    </Card>
+  );
+};
+```
+
+
+
+그럼 `<Card>`태그 사이에 있는 내용이 그대로 박혀야 한다.
+
+이럴때 Card.js 에서 props.children을 사용한다.
+
+```react
+const Card = props => {
+    return <div>
+        {props.children}
+    </div>
+};
+```
+
+
+
