@@ -457,3 +457,60 @@ useEffect(() => {
 }, [enteredEmail, enteredPassword]);
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+useReducer()
+
+- useState가 너무 복잡할 경우에 사용
+
+`const [state, dispatchFn] = useReducer(reducerFn, initialState, initFn);`
+
+- `dispatchFn`에 객체를 넣어서 함수를 실행할 수 있음
+- `reducerFn`에서 현재 상태인 `state`와 파라미터로 받은 `action`을 인자로 받는데, `action`의 값에 따라 `state`를 처리하는 로직을 사용
+  - 리턴값은 업데이트 되는`state` 정보
+
+```react
+const emailReducer = (state, action) => {
+  if (action.type === "USER_INPUT") {
+    return { value: action.val, isValid: action.val.includes("@") };
+  }
+  if (action.type === "INPUT_BLUR") {
+    return { value: state.value, isValid: state.value.includes("@") };
+  }
+  return { value: "", isValid: false };
+};
+
+ const [emailState, dispatchEmail] = useReducer(emailReducer, {
+    value: "",
+    isValid: false,
+  });
+
+dispatchEmail({ type: "USER_INPUT", val: event.target.value });
+```
+
+
+
+
+
+
+
+
+
+Rules of Hooks
+
+1. Only call React Hooks In **React Functions**
+
+2. Only call React Hooks at the Top Level
+3. 
