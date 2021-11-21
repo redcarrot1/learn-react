@@ -271,3 +271,189 @@ const Card = props => {
 
 
 
+
+
+
+
+
+
+Return 루트 태그는 1개이어야 한다.
+
+이를 위해 보통 `<div>`로 감싸는데, 이렇게 되면 큰 프로젝트에선 로딩될 때 엄청나게 겹쳐져있는것을 볼 수 있다.
+
+리액트는 `<React.Fragment>`를 지원한다. 또는 임폴트에 `Fragment`를 작성 후 `<Fragment>`만 사용
+
+```react
+import React, { Fragment} from 'react';
+
+function App() {
+  return (
+    <React.Fragment>
+      <h1> </h1>
+      <h2> </h2>
+    </React.Fragment>
+  );
+}
+
+또는
+
+function App() {
+  return (
+    <Fragment>
+      <h1> </h1>
+      <h2> </h2>
+    </Fragment>
+  );
+}
+```
+
+
+
+
+
+
+
+
+
+포탈
+
+원하는 html 장소에 코드를 넣는 것
+
+`ReactDOM.createPortal(jsx, 원하는 위치)`
+
+```react
+import React from "react";
+import ReactDOM from "react-dom";
+
+const Backdrop = (props) => {
+  return <div>{props.message}</div>
+};
+
+const ModalOverlay = (props) => {
+  return (
+    <div> ok </div>
+  );
+};
+
+const ErrorModal = (props) => {
+  return (
+    <React.Fragment>
+      {ReactDOM.createPortal(
+        <Backdrop message={props.message} />,
+        document.getElementById("backdrop-root")
+      )}
+      {ReactDOM.createPortal(
+        <ModalOverlay />,
+        document.getElementById("overlay-root")
+      )}
+    </React.Fragment>
+  );
+};
+
+export default ErrorModal;
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+ref
+
+사용자의 input을 전송 시 받을 수 있다.
+
+useRef로 생성 후 `<input id="username" type="text" ref={nameInputRef} />`
+
+
+
+onChange와 useState를 함께 써서 입력값을 받아도 좋지만, 그럴경우 불필요한 로깅을 계속 하게 된다. 하지만 사용 기능은 더 다양하짐
+
+ref를 사용하면 쉽게 사용자 input값을 불필요한 로그 없이 받을 수 있지만, 조작하는데 한계가 있다.
+
+```react
+import React, { useState, useRef } from "react";
+
+const AddUser = (props) => {
+  const nameInputRef = useRef();
+  const ageInputRef = useRef();
+
+  const addUserHandler = (event) => {
+    event.preventDefault();
+    const enteredName = nameInputRef.current.value;
+    const enteredUserAge = ageInputRef.current.value;
+    console.log(enteredName);
+    console.log(enteredUserAge)l
+
+    //ref를 직접 수정하는 것은 추천하지 않는다.
+    nameInputRef.current.value='';
+    ageInputRef.current.value='';
+  };
+
+  const errorHandler = () => {
+    setError(null);
+  };
+
+  return (
+        <form onSubmit={addUserHandler}>
+          <label htmlFor="username">Username</label>
+          <input id="username" type="text" ref={nameInputRef} />
+      
+          <label htmlFor="age">Age (Years)</label>
+          <input id="age" type="number" ref={ageInputRef} />
+      
+          <Button type="submit">Add User</Button>
+        </form>
+  );
+};
+
+export default AddUser;
+```
+
+
+
+
+
+
+
+
+
+
+
+useEffect(함수, 의존변수)
+
+첫 리로드 된 후 실행 + 의존변수의 값이 변할때마다 함수가 실행됨
+
+- 의존 인자를 넣지 않으면 첫실행 + 컴포넌트가 다시 그려질 때마다 실행된다
+- 빈 객체(`[]`를 첫으면 첫 실행에만 실행
+- 의존 변수를 넣으면 첫 실행+그 변수가 업데이트 될 때만 실행
+
+
+
+return 으로 함수를 넘길 수 있는데, 일명 cleanup 함수이다.
+
+cleanup함수는 useEffect가 다시 실행되기 전에 실행된다.
+
+useEffect1 -> cleanup useEffect2 -> cleanup useEffect3 ->...
+
+
+
+```react
+useEffect(() => {
+  const identifier=setTimeout(() => { //특정 시간이 지난 후에 실행
+    console.log('Checking form validity!')
+  }, 500);
+
+  return ()=>{ //useEffect가 다시 실행되기 전에 실행됨
+    console.log('CLEANUP');
+    clearTimeout(identifier); //내장함수. 실행 대기 중인 setTimeout 함수를 없앨 수 있다.
+  };
+}, [enteredEmail, enteredPassword]);
+```
+
