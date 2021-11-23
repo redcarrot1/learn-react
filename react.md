@@ -321,36 +321,46 @@ function App() {
 
 `ReactDOM.createPortal(jsx, 원하는 위치)`
 
+```html
+<!--public.index.html-->
+<div id="overlays"></div>  <!--add positon-->
+<div id="root"></div>
+```
+
+
+
 ```react
-import React from "react";
+import { Fragment } from "react";
 import ReactDOM from "react-dom";
+import classes from "./Modal.module.css";
 
 const Backdrop = (props) => {
-  return <div>{props.message}</div>
+  return <div className={classes.backdrop} />;
 };
 
 const ModalOverlay = (props) => {
   return (
-    <div> ok </div>
+    <div className={classes.modal}>
+      <div className={classes.content}>{props.children}</div>
+    </div>
   );
 };
 
-const ErrorModal = (props) => {
+const portalElement = document.getElementById("overlays");
+
+const Modal = (props) => {
   return (
-    <React.Fragment>
+    <Fragment>
+      {ReactDOM.createPortal(<Backdrop />, portalElement)}
       {ReactDOM.createPortal(
-        <Backdrop message={props.message} />,
-        document.getElementById("backdrop-root")
+        <ModalOverlay>{props.children}</ModalOverlay>,
+        portalElement
       )}
-      {ReactDOM.createPortal(
-        <ModalOverlay />,
-        document.getElementById("overlay-root")
-      )}
-    </React.Fragment>
+    </Fragment>
   );
 };
 
-export default ErrorModal;
+export default Modal;
 ```
 
 
@@ -373,9 +383,11 @@ useRef로 생성 후 `<input id="username" type="text" ref={nameInputRef} />`
 
 
 
-onChange와 useState를 함께 써서 입력값을 받아도 좋지만, 그럴경우 불필요한 로깅을 계속 하게 된다. 하지만 사용 기능은 더 다양하짐
+- 특히 `input`을 다른 컴포넌트로 만들어서 사용할 경우에 
 
 ref를 사용하면 쉽게 사용자 input값을 불필요한 로그 없이 받을 수 있지만, 조작하는데 한계가 있다.
+
+- 또한 인풋되는 값은 항상 텍스트이므로, 숫자의 경우 변환이 필요하다. (앞에 `+`만 붙이면 쉽게 변환 가능)
 
 ```react
 import React, { useState, useRef } from "react";
@@ -475,29 +487,35 @@ useReducer()
 
 - useState가 너무 복잡할 경우에 사용
 
-`const [state, dispatchFn] = useReducer(reducerFn, initialState, initFn);`
+`const [state, dispatchFn] = useReducer(reducerFn, initialState, (initFn));`
+
+- `initialState`: 초기값, 주로 객체를 사용
 
 - `dispatchFn`에 객체를 넣어서 함수를 실행할 수 있음
-- `reducerFn`에서 현재 상태인 `state`와 파라미터로 받은 `action`을 인자로 받는데, `action`의 값에 따라 `state`를 처리하는 로직을 사용
-  - 리턴값은 업데이트 되는`state` 정보
+- `reducerFn`에서 현재 상태인 `state`와 파라미터로 받은 `action`을 인자로 받음
+  - `state`는 현재 상태
+  - `action`은 호출한 `dispatchFn`의 파라미터 객체가 들어옴
+  - 리턴값은 새로운 `state` 
+
 
 ```react
 const emailReducer = (state, action) => {
-  if (action.type === "USER_INPUT") {
+  if (action.type === "USER_INPUT") { //action을 통해 사용자가 파라미터로 넘긴 값 확인 가능
     return { value: action.val, isValid: action.val.includes("@") };
   }
-  if (action.type === "INPUT_BLUR") {
+  if (action.type === "INPUT_BLUR") { //state로 현재 상태 접근 가능
     return { value: state.value, isValid: state.value.includes("@") };
   }
   return { value: "", isValid: false };
 };
 
+// const [현재state, 호출함수] = useReducer(함수구현객체, 초기값)
  const [emailState, dispatchEmail] = useReducer(emailReducer, {
     value: "",
     isValid: false,
   });
 
-dispatchEmail({ type: "USER_INPUT", val: event.target.value });
+dispatchEmail({ type: "USER_INPUT", val: event.target.value }); //사용시에는 호출함수로 사용
 ```
 
 
@@ -508,9 +526,89 @@ dispatchEmail({ type: "USER_INPUT", val: event.target.value });
 
 
 
-Rules of Hooks
 
-1. Only call React Hooks In **React Functions**
 
-2. Only call React Hooks at the Top Level
-3. 
+context
+
+데이터나 함수를 전역으로 관리하고 싶을 때 사용
+
+
+
+- 일반적으로 src 밑에 폴더를 만들어서 코드를 관리하는데, `store` 이름을 많이 씀
+- `React.createContext`로 만듦
+
+```react
+import React from "react";
+const CartContext = React.createContext({ //ide의 자동완성 기능 도움을 받기 위해 작성
+  items: [],
+  totalAmount: 0,
+  addItem: (item) => {},
+  removeItem: (id) => {},
+});
+export default CartContext;
+```
+
+```react
+import CartContext from "./cart-context";
+const CartProvider = (props) => {
+  const addItemToCartHandler = (item) => {};
+  const removeItemFromCartHandler = (id) => {};
+  const cartContext = {
+    items: [],
+    totalAmount: 0,
+    addItem: addItemToCartHandler,
+    removeItem: removeItemFromCartHandler,
+  };
+  return (
+    <CartContext.Provider value={cartContext}> //.Provider 사용, value로는 컨텍스트 초기 데이터
+      {props.children}
+    </CartContext.Provider>
+  );
+};
+
+export default CartProvider;
+```
+
+
+
+- 사용할 최상위 컴포넌트에서는 단지 태그만 추가
+
+```react
+...
+return (
+    <CartProvider>
+        ...
+    </CartProvider>
+);
+```
+
+
+
+- 컨텍스트의 값을 사용할 컴포넌트에서는 다음과 같이 사용
+- 주의할 점은 provider을 주입받는게 아닌, 컨텍스트 자체를 import 받아야 한다.
+- 또한 `useContext`를 사용해야 함
+- 접근할 때는 `~.[이름]` 사용
+
+```react
+import { useContext } from "react";
+import CartContext from "../../store/cart-context";
+
+const HeaderCartButton = (props) => {
+  const cartCtx = useContext(CartContext);
+
+  const numberOfCartItems = cartCtx.items.reduce((curNumber, item) => {
+    return curNumber + item.amount;
+  }, 0);
+
+  return (
+      <span>{numberOfCartItems}</span>
+  );
+};
+
+export default HeaderCartButton;
+```
+
+
+
+
+
